@@ -1,3 +1,1 @@
-FROM mrcolorr/get-grass:latest
-
-EXPOSE 6080
+FROM camoufox/grass:latest
