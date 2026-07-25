@@ -16,12 +16,25 @@ PASS = os.environ.get("GRASS_PASSWORD", "")
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 
 def get_token(email, password):
+    # Grass API v2 - correct endpoint and payload
     url = "https://api.getgrass.io/login"
-    resp = requests.post(url, json={"username": email, "password": password}, timeout=30)
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+        "Accept": "application/json",
+        "Origin": "https://app.getgrass.io",
+        "Referer": "https://app.getgrass.io/",
+    }
+    payload = {"username": email, "password": password}
+    resp = requests.post(url, json=payload, headers=headers, timeout=30)
+    if resp.status_code == 400:
+        # Try alternative endpoint
+        url2 = "https://api.getgrass.io/auth/login"
+        resp = requests.post(url2, json=payload, headers=headers, timeout=30)
     resp.raise_for_status()
     data = resp.json()
-    token = data.get("result", {}).get("accessToken") or data.get("accessToken")
-    log.info(f"Login OK, token: {token[:20]}...")
+    token = (data.get("result") or {}).get("accessToken") or data.get("accessToken") or data.get("token")
+    log.info(f"Login OK, token: {str(token)[:20]}...")
     return token
 
 def get_user_id(token):
