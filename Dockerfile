@@ -1,1 +1,2 @@
-FROM camoufox/grass:latest
+FROM alpine:latest
+CMD tail -f /dev/null
